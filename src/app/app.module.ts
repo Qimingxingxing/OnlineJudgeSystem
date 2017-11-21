@@ -5,15 +5,21 @@ import { ProblemListComponent } from './components/problem-list/problem-list.com
 import { DataService } from "./services/data.service";
 import { ProblemDetailComponent } from './components/problem-detail/problem-detail.component';
 import { AppRoutingModule } from "./app.routes";
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { NewProblemComponent } from './components/new-problem/new-problem.component';
+import { FormsModule }   from '@angular/forms';
 @NgModule({
   declarations: [
     AppComponent,
     ProblemListComponent,
-    ProblemDetailComponent
+    ProblemDetailComponent,
+    NavbarComponent,
+    NewProblemComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [DataService],
   bootstrap: [AppComponent]
