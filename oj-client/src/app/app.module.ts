@@ -8,6 +8,8 @@ import { AppRoutingModule } from "./app.routes";
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NewProblemComponent } from './components/new-problem/new-problem.component';
 import { FormsModule }   from '@angular/forms';
+import { HttpModule }    from '@angular/http';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -19,7 +21,8 @@ import { FormsModule }   from '@angular/forms';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpModule
   ],
   providers: [DataService],
   bootstrap: [AppComponent]
