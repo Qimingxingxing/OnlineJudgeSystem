@@ -23,7 +23,7 @@ export class DataService {
   }
   
   getProblem(id: number) {
-    return this.http.get(`api/v1/problem/${id}`)
+    return this.http.get(`api/v1/problems/${id}`)
       .toPromise()
       .then((res: Response) => {
         this.getProblems();
@@ -43,6 +43,20 @@ export class DataService {
       .catch(this.handleError)
   }
 
+  buildAndRun(data: Object): Promise<Object> {
+    const headers = new Headers({'content-type': 'application/json'});
+    return this.http.post('/api/v1/build_and_run', data, {headers: headers})
+      .toPromise()
+      .then((res: Response) => {
+        console.log('in client side build and run ', res);
+        return res.json();
+      })
+      .catch(this.handleError);
+  }
+
+  /**
+   * common error handler
+   */
   private handleError(error: any): Promise<any> {
     console.error('An error occured', error);
     return Promise.reject(error);

@@ -6,7 +6,8 @@ import { ProblemDetailComponent } from "./components/problem-detail/problem-deta
 const routes: Routes = [
   { path: '', redirectTo: 'problems', pathMatch: 'full' },
   { path: 'problems', component: ProblemListComponent },
-  { path: 'problems/:id', component: ProblemDetailComponent }
+  { path: 'problems/:id', component: ProblemDetailComponent },
+  { path: '**', redirectTo: 'problems'}
 ];
 
 @NgModule({

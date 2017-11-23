@@ -1,4 +1,4 @@
-<div class = "container" *ngIf = "problem">
+<div class="container" *ngIf="problem">
   <div class="col-xs-12 col-md-4">
     <h2>
       {{problem.id}}. {{problem.name}}
@@ -6,6 +6,9 @@
     <p>
       {{problem.desc}}
     </p>
+  </div>
 
+  <div class="col-sm-12 col-md-8 hidden-xs">
+    <app-editor></app-editor>
   </div>
 </div>

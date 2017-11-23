@@ -9,9 +9,17 @@ mongoose.connect('mongodb://localhost/test', { useMongoClient: true });
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../public/')));
-
-app.use("/api/v1", restRouter);
 app.use("/", indexRouter);
-
-app.listen(3000, function () {
+app.use("/api/v1", restRouter);
+app.use(function(req, res) {
+    res.sendFile('index.html', {root: path.join(__dirname, '../public')});
 });
+const http = require('http');
+const socketIO = require('socket.io');
+const io = socketIO();
+
+const editorSocketService = require('./services/editorSocketService.js')(io);
+
+const server = http.createServer(app);
+io.attach(server);
+server.listen(3000);

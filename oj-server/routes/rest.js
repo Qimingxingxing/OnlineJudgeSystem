@@ -8,7 +8,7 @@ router.get('/problems', (req, res) => {
     problemService.getProblems().then(problems => res.json(problems));
 })
 
-router.get('/problem/:id', (req, res) => {
+router.get('/problems/:id', (req, res) => {
     const id = req.params.id;
     problemService.getProblem(+id).then(problem => res.json(problem));
 })
