@@ -212,7 +212,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/editor/editor.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<section>\n  <header>\n    <select class=\"form-control pull-left lang-select\" id=\"language\" \n        name=\"language\" \n        [(ngModel)]=\"language\"\n        (change)=\"setLanguage(language)\" \n       >\n       <option *ngFor=\"let language of languages\">\n         {{language}}\n       </option>\n    </select>\n\n    <!-- Button trigger modal -->\n    <button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#myModal\">\n      <span class=\"glyphicon glyphicon-refresh\" aria-hidden=\"true\"></span>\n    </button>\n\n    <!-- Modal -->\n    <div class=\"modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">\n      <div class=\"modal-dialog\" role=\"document\">\n        <div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <h5 class=\"modal-title\" id=\"exampleModalLabel\">Reset?</h5>\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n              <span aria-hidden=\"true\">&times;</span>\n            </button>\n          </div>\n          <div class=\"modal-body\">\n            Are you sure\n          </div>\n          <div class=\"modal-footer\">\n            <button type=\"button\" class=\"btn btn-secondary\" data-dismiss=\"modal\"\n              (click)=\"resetEditor()\">Reset</button>\n            <button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\">Cancel</button>\n          </div>\n        </div>\n      </div>\n    </div>\n  </header>\n  <br/>\n  <div class=\"row\">\n    <div id=\"editor\">\n    </div>\n  </div>\n  <footer>\n    <button type=\"button\" class=\"btn btn-success pull-right\" (click)=\"submit()\">\n      Submit Solution\n    </button>\n  </footer>\n</section>"
+module.exports = "<section>\n  <header>\n    <select class=\"form-control pull-left lang-select\" id=\"language\" \n        name=\"language\" \n        [(ngModel)]=\"language\"\n        (change)=\"setLanguage(language)\" \n       >\n       <option *ngFor=\"let language of languages\">\n         {{language}}\n       </option>\n    </select>\n\n    <!-- Button trigger modal -->\n    <button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#myModal\">\n      <span class=\"glyphicon glyphicon-refresh\" aria-hidden=\"true\"></span>\n    </button>\n\n    <!-- Modal -->\n    <div class=\"modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">\n      <div class=\"modal-dialog\" role=\"document\">\n        <div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <h5 class=\"modal-title\" id=\"exampleModalLabel\">Reset?</h5>\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n              <span aria-hidden=\"true\">&times;</span>\n            </button>\n          </div>\n          <div class=\"modal-body\">\n            Are you sure\n          </div>\n          <div class=\"modal-footer\">\n            <button type=\"button\" class=\"btn btn-secondary\" data-dismiss=\"modal\"\n              (click)=\"resetEditor()\">Reset</button>\n            <button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\">Cancel</button>\n          </div>\n        </div>\n      </div>\n    </div>\n  </header>\n  <br/>\n  <div class=\"row\">\n    <div id=\"editor\">\n    </div>\n    <div>\n      {{output}}\n    </div>\n  </div>\n  <footer>\n    <button type=\"button\" class=\"btn btn-success pull-right\" (click)=\"submit()\">\n      Submit Solution\n    </button>\n  </footer>\n</section>"
 
 /***/ }),
 
@@ -224,6 +224,7 @@ module.exports = "<section>\n  <header>\n    <select class=\"form-control pull-l
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/esm5/core.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_router__ = __webpack_require__("../../../router/esm5/router.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_collaboration_service__ = __webpack_require__("../../../../../src/app/services/collaboration.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_data_service__ = __webpack_require__("../../../../../src/app/services/data.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -236,12 +237,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var EditorComponent = (function () {
-    function EditorComponent(collaboration, route) {
+    function EditorComponent(collaboration, route, data) {
         this.collaboration = collaboration;
         this.route = route;
+        this.data = data;
         this.languages = ['Java', 'Python'];
         this.language = 'Java';
+        this.output = '';
         // default content
         // NOTE!!!!!! the multiline string is using ``, not ''
         this.defaultContent = {
@@ -294,12 +298,22 @@ var EditorComponent = (function () {
      * reset editor mode to current selected language and value to default content
      */
     EditorComponent.prototype.resetEditor = function () {
+        console.log('Resseting editor...');
         this.editor.getSession().setMode("ace/mode/" + this.language.toLowerCase());
         this.editor.setValue(this.defaultContent[this.language]);
+        this.output = '';
     };
     EditorComponent.prototype.submit = function () {
-        // TODO
+        var _this = this;
+        this.output = '';
         var userCodes = this.editor.getValue();
+        // console.log(userCodes);
+        var codes = {
+            userCodes: userCodes,
+            lang: this.language.toLocaleLowerCase()
+        };
+        this.data.buildAndRun(codes)
+            .then(function (res) { return _this.output = res.text; });
     };
     EditorComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["n" /* Component */])({
@@ -308,7 +322,8 @@ var EditorComponent = (function () {
             styles: [__webpack_require__("../../../../../src/app/components/editor/editor.component.css")]
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__services_collaboration_service__["a" /* CollaborationService */],
-            __WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* ActivatedRoute */]])
+            __WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* ActivatedRoute */],
+            __WEBPACK_IMPORTED_MODULE_3__services_data_service__["a" /* DataService */]])
     ], EditorComponent);
     return EditorComponent;
 }());
@@ -861,6 +876,19 @@ var DataService = (function () {
         })
             .catch(this.handleError);
     };
+    DataService.prototype.buildAndRun = function (data) {
+        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["a" /* Headers */]({ 'content-type': 'application/json' });
+        return this.http.post('/api/v1/build_and_run', data, { headers: headers })
+            .toPromise()
+            .then(function (res) {
+            console.log('in client side build and run ', res);
+            return res.json();
+        })
+            .catch(this.handleError);
+    };
+    /**
+     * common error handler
+     */
     DataService.prototype.handleError = function (error) {
         console.error('An error occured', error);
         return Promise.reject(error);

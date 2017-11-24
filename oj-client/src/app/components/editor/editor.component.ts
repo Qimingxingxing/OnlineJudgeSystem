@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { CollaborationService } from '../../services/collaboration.service';
 import { DataService } from '../../services/data.service';
@@ -14,7 +14,7 @@ export class EditorComponent implements OnInit {
   languages: string[] = ['Java', 'Python'];
   language: string = 'Java';
   sessionId: string;
-  output: string = '';  
+  output: string = '';
   // default content
   // NOTE!!!!!! the multiline string is using ``, not ''
   defaultContent = {
@@ -29,7 +29,7 @@ export class EditorComponent implements OnInit {
   };
   constructor(private collaboration: CollaborationService,
               private route: ActivatedRoute,
-              private data: DataService) { }
+               private data: DataService) { }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -82,15 +82,16 @@ export class EditorComponent implements OnInit {
    * reset editor mode to current selected language and value to default content
    */
   resetEditor(): void {
+    console.log('Resseting editor...');
     this.editor.getSession().setMode(`ace/mode/${this.language.toLowerCase()}`);
     this.editor.setValue(this.defaultContent[this.language]);
-    this.output = '';    
+    this.output = '';
   }
 
   submit() {
-    // TODO
-    this.output = '';    
+    this.output = '';
     const userCodes = this.editor.getValue();
+    // console.log(userCodes);
     const codes = {
       userCodes: userCodes,
       lang: this.language.toLocaleLowerCase()
