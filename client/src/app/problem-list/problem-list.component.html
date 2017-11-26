@@ -1,0 +1,13 @@
+<div class="container">
+  <br/>
+  <input type="text" class="form-control" placeholder="Search Problem" [(ngModel)]="search" >
+  <br/>
+  <div *ngFor="let problem of problems"  class="list-group" [routerLink]="['/problems', problem.id]">
+    <a class="list-group-item" *ngIf="problem.name.toLocaleLowerCase().indexOf(search.toLocaleLowerCase())!=-1">
+      <span class="{{'pull-left label difficulty diff-' + problem.difficulty.toLocaleLowerCase()}}">        
+        {{problem.difficulty}}
+      </span>
+      <strong class="title">{{problem.id}}. {{problem.name}}</strong>
+    </a>
+  </div>
+</div>
