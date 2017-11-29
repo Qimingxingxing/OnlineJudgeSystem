@@ -392,7 +392,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".container{\n    width: 30%\n}", ""]);
+exports.push([module.i, ".container{\n    width: 40%\n}", ""]);
 
 // exports
 
@@ -546,7 +546,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".label {\n    padding-top: 0.6em;\n    color: #fdfafa;\n    font-size: 12px;\n    min-width: 65px;\n    margin-right: 10px;\n  }\n  \n  .title {\n    font-size: 1.2em;\n  }\n  \n  .diff-easy {\n    background-color: #42ebf4;\n  }\n  \n  .diff-medium {\n    background-color: #92cf5c;\n  }\n  \n  .diff-hard {\n    background-color: #dd0d1e;\n  }\n  \n  .diff-super {\n    background-color: #8d16e2;\n  }\n  .container {\n    width: 30%\n  }", ""]);
+exports.push([module.i, ".label {\n    padding-top: 0.6em;\n    color: #fdfafa;\n    font-size: 12px;\n    min-width: 65px;\n    margin-right: 10px;\n  }\n  \n  .title {\n    font-size: 1.2em;\n  }\n  \n  .diff-easy {\n    background-color: #42ebf4;\n  }\n  \n  .diff-medium {\n    background-color: #92cf5c;\n  }\n  \n  .diff-hard {\n    background-color: #dd0d1e;\n  }\n  \n  .diff-super {\n    background-color: #8d16e2;\n  }\n  .container {\n    width:40%\n  }", ""]);
 
 // exports
 
