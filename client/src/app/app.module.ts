@@ -10,6 +10,8 @@ import { DataService } from './services/data.service';
 import { AppRoutingModule }     from './app-routing.module';
 import { EditorComponent } from './editor/editor.component';
 import { HttpModule }    from '@angular/http';
+import { CollaborationService } from './services/collaboration.service';
+
 
 @NgModule({
   declarations: [
@@ -26,7 +28,7 @@ import { HttpModule }    from '@angular/http';
     FormsModule,
     HttpModule
   ],
-  providers: [DataService],
+  providers: [DataService, CollaborationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

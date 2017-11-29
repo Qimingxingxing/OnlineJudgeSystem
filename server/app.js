@@ -13,4 +13,11 @@ app.use("/api/v1", restRouter);
 app.use(function(req, res) {
     res.sendFile('index.html', {root: path.join(__dirname, '../public')});
 });
-app.listen(3000);
+const http = require('http');
+const socketIO = require('socket.io');
+const io = socketIO();
+
+const editorSocketService = require('./services/editorSocketService.js')(io);
+const server = http.createServer(app);
+io.attach(server);
+server.listen(3000);

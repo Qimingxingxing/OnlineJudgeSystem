@@ -148,12 +148,14 @@ var AppComponent = (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__app_routing_module__ = __webpack_require__("../../../../../src/app/app-routing.module.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__editor_editor_component__ = __webpack_require__("../../../../../src/app/editor/editor.component.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__angular_http__ = __webpack_require__("../../../http/esm5/http.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__services_collaboration_service__ = __webpack_require__("../../../../../src/app/services/collaboration.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 
@@ -185,7 +187,7 @@ var AppModule = (function () {
                 __WEBPACK_IMPORTED_MODULE_2__angular_forms__["a" /* FormsModule */],
                 __WEBPACK_IMPORTED_MODULE_11__angular_http__["c" /* HttpModule */]
             ],
-            providers: [__WEBPACK_IMPORTED_MODULE_8__services_data_service__["a" /* DataService */]],
+            providers: [__WEBPACK_IMPORTED_MODULE_8__services_data_service__["a" /* DataService */], __WEBPACK_IMPORTED_MODULE_12__services_collaboration_service__["a" /* CollaborationService */]],
             bootstrap: [__WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */]]
         })
     ], AppModule);
@@ -229,6 +231,8 @@ module.exports = "<br />\n\n<div class=\"alert alert-info\" role=\"alert\">The e
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/esm5/core.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_data_service__ = __webpack_require__("../../../../../src/app/services/data.service.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__DefaultContent__ = __webpack_require__("../../../../../src/app/DefaultContent.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_collaboration_service__ = __webpack_require__("../../../../../src/app/services/collaboration.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_router__ = __webpack_require__("../../../router/esm5/router.js");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -241,17 +245,51 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
+
 var EditorComponent = (function () {
-    function EditorComponent(data) {
+    function EditorComponent(data, route, collaboration) {
         this.data = data;
+        this.route = route;
+        this.collaboration = collaboration;
         this.languages = ["java", "python", "cpp"];
         this.language = "java";
         this.defaultContent = __WEBPACK_IMPORTED_MODULE_2__DefaultContent__["a" /* DEFAULTCONTENT */];
     }
     EditorComponent.prototype.ngOnInit = function () {
-        this.editor = ace.edit("editor");
-        this.editor.setTheme("ace/theme/eclipse");
+        var _this = this;
+        this.route.params.subscribe(function (params) {
+            // get the problem id from ActivatedRoute params
+            _this.sessionId = params['id'];
+            _this.initEditor();
+        });
+    };
+    /**
+     * initialize ace editor
+     */
+    EditorComponent.prototype.initEditor = function () {
+        var _this = this;
+        this.editor = ace.edit('editor');
+        this.editor.setTheme('ace/theme/eclipse');
         this.resetEditor();
+        // set mouse focus in ace editor
+        document.getElementsByTagName('textarea')[0].focus();
+        // handshake socket.io
+        this.collaboration.init(this.editor, this.sessionId);
+        this.editor.lastAppliedChange = null;
+        // register change event handler
+        this.editor.on('change', function (e) {
+            if (_this.editor.lastAppliedChange != e) {
+                _this.collaboration.change(JSON.stringify(e));
+            }
+        });
+        // register changeCursor event handler
+        this.editor.getSession().getSelection().on('changeCursor', function () {
+            var cursor = _this.editor.getSession().getSelection().getCursor();
+            _this.collaboration.cursorMove(JSON.stringify(cursor));
+        });
+        // call restore buffer to get history/cached instructions
+        this.collaboration.restoreBuffer();
     };
     EditorComponent.prototype.setLanguage = function (language) {
         this.language = language;
@@ -274,7 +312,9 @@ var EditorComponent = (function () {
             template: __webpack_require__("../../../../../src/app/editor/editor.component.html"),
             styles: [__webpack_require__("../../../../../src/app/editor/editor.component.css")]
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__services_data_service__["a" /* DataService */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__services_data_service__["a" /* DataService */],
+            __WEBPACK_IMPORTED_MODULE_4__angular_router__["a" /* ActivatedRoute */],
+            __WEBPACK_IMPORTED_MODULE_3__services_collaboration_service__["a" /* CollaborationService */]])
     ], EditorComponent);
     return EditorComponent;
 }());
@@ -569,6 +609,90 @@ var ProblemListComponent = (function () {
 
 /***/ }),
 
+/***/ "../../../../../src/app/services/collaboration.service.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CollaborationService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/esm5/core.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_colors__ = __webpack_require__("../../../../../src/assets/colors.ts");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+var CollaborationService = (function () {
+    function CollaborationService() {
+        this.clientsInfo = {};
+        this.clientNum = 0;
+    }
+    CollaborationService.prototype.init = function (editor, sessionId) {
+        var _this = this;
+        // handshake, send sessionId
+        this.collaborationSocket = io(window.location.origin, { query: 'sessionId=' + sessionId });
+        // change event handler
+        this.collaborationSocket.on('change', function (delta) {
+            delta = JSON.parse(delta);
+            editor.lastAppliedChange = delta;
+            // apply changes received from server to ace editor
+            editor.getSession().getDocument().applyDeltas([delta]);
+        });
+        // cursorMove event handler
+        this.collaborationSocket.on('cursorMove', function (cursor) {
+            var session = editor.getSession();
+            cursor = JSON.parse(cursor);
+            var x = cursor['row'];
+            var y = cursor['column'];
+            var changeClientId = cursor['socketId'];
+            if (changeClientId in _this.clientsInfo) {
+                // if the changeClientId(socket.id) is already in the clientsInfo
+                // remove the original marker
+                session.removeMarker(_this.clientsInfo[changeClientId]['marker']);
+            }
+            else {
+                // it's a new client, assign a new color to the new client
+                _this.clientsInfo[changeClientId] = {};
+                var css = document.createElement('style');
+                css.type = 'text/css';
+                css.innerHTML = '.editor_cursor_' + changeClientId
+                    + '{ position: absolute; background: ' + __WEBPACK_IMPORTED_MODULE_1__assets_colors__["a" /* COLORS */][_this.clientNum] + ';'
+                    + 'z-index: 100; width: 3px !important; }';
+                document.body.appendChild(css);
+                _this.clientNum++;
+            }
+            // draw a new marker, marker is not supported by ace, we draw a range instead
+            // the range is very slim, only 3px, so it looks like a cursor
+            var Range = ace.require('ace/range').Range;
+            var newMarker = session.addMarker(new Range(x, y, x, y + 1), 'editor_cursor_' + changeClientId, true);
+            _this.clientsInfo[changeClientId]['marker'] = newMarker;
+        });
+    };
+    CollaborationService.prototype.change = function (delta) {
+        this.collaborationSocket.emit('change', delta);
+    };
+    CollaborationService.prototype.cursorMove = function (cursor) {
+        this.collaborationSocket.emit('cursorMove', cursor);
+    };
+    CollaborationService.prototype.restoreBuffer = function () {
+        this.collaborationSocket.emit('restoreBuffer');
+    };
+    CollaborationService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["A" /* Injectable */])(),
+        __metadata("design:paramtypes", [])
+    ], CollaborationService);
+    return CollaborationService;
+}());
+
+
+
+/***/ }),
+
 /***/ "../../../../../src/app/services/data.service.ts":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -640,6 +764,56 @@ var DataService = (function () {
     return DataService;
 }());
 
+
+
+/***/ }),
+
+/***/ "../../../../../src/assets/colors.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return COLORS; });
+var COLORS = [
+    "#0000ff",
+    "#a52a2a",
+    "#00ffff",
+    "#00008b",
+    "#008b8b",
+    "#a9a9a9",
+    "#006400",
+    "#bdb76b",
+    "#8b008b",
+    "#556b2f",
+    "#ff8c00",
+    "#9932cc",
+    "#8b0000",
+    "#e9967a",
+    "#9400d3",
+    "#ff00ff",
+    "#ffd700",
+    "#008000",
+    "#4b0082",
+    "#f0e68c",
+    "#add8e6",
+    "#e0ffff",
+    "#90ee90",
+    "#d3d3d3",
+    "#ffb6c1",
+    "#ffffe0",
+    "#00ff00",
+    "#ff00ff",
+    "#800000",
+    "#000080",
+    "#808000",
+    "#ffa500",
+    "#ffc0cb",
+    "#800080",
+    "#800080",
+    "#ff0000",
+    "#c0c0c0",
+    "#ffffff",
+    "#ffff00"
+];
 
 
 /***/ }),
